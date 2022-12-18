@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/mohnaofal/clean-architecture/app/models"
-	"github.com/mohnaofal/clean-architecture/app/services"
+	"github.com/mohnaofal/go-clean-architecture/app/models"
+	"github.com/mohnaofal/go-clean-architecture/app/services"
 )
 
 type ProductsHandler struct {
