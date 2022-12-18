@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mohnaofal/clean-architecture/app/models"
+	"github.com/mohnaofal/go-clean-architecture/app/models"
 	"gorm.io/gorm"
 )
 

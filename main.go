@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/joho/godotenv"
-	"github.com/mohnaofal/clean-architecture/app/handler"
-	"github.com/mohnaofal/clean-architecture/app/services"
-	"github.com/mohnaofal/clean-architecture/config"
-	"github.com/mohnaofal/clean-architecture/migration/migrate"
+	"github.com/mohnaofal/go-clean-architecture/app/handler"
+	"github.com/mohnaofal/go-clean-architecture/app/services"
+	"github.com/mohnaofal/go-clean-architecture/config"
+	"github.com/mohnaofal/go-clean-architecture/migration/migrate"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

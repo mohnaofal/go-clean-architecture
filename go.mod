@@ -1,4 +1,4 @@
-module github.com/mohnaofal/clean-architecture
+module github.com/mohnaofal/go-clean-architecture
 
 go 1.19
 

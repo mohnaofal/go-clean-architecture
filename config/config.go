@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/mohnaofal/clean-architecture/pkg/database"
+	"github.com/mohnaofal/go-clean-architecture/pkg/database"
 )
 
 type Config struct {
