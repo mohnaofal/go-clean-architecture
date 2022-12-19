@@ -3,118 +3,92 @@ package services
 import (
 	"context"
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/mohnaofal/go-clean-architecture/app/models"
+	"github.com/mohnaofal/go-clean-architecture/app/repository"
 	"gorm.io/gorm"
 )
 
-var products = make([]models.Product, 0)
-
 type productsCtx struct {
+	productsRepository repository.ProductRepository
 }
 
 type Products interface {
 	Create(ctx context.Context, form *models.Product) (*models.Product, error)
 	Update(ctx context.Context, form *models.Product) (*models.Product, error)
 	View(ctx context.Context) ([]models.Product, error)
-	Detail(ctx context.Context, productCode string) (*models.Product, error)
-	Delete(ctx context.Context, productCode string) error
+	Detail(ctx context.Context, productID int) (*models.Product, error)
+	Delete(ctx context.Context, productID int) error
 }
 
-func NewProducts() Products {
-	return &productsCtx{}
+func NewProducts(productsRepository repository.ProductRepository) Products {
+	return &productsCtx{productsRepository: productsRepository}
 }
 
 func (c *productsCtx) Create(ctx context.Context, form *models.Product) (*models.Product, error) {
-	for _, val := range products {
-		if strings.EqualFold(val.ProductCode, form.ProductCode) {
-			return nil, errors.New("product already exist")
-		}
+	data, err := c.productsRepository.Upsert(ctx, form)
+	if err != nil {
+		return nil, err
 	}
-
-	data := &models.Product{
-		Model: gorm.Model{
-			ID:        uint(time.Now().Unix()),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		},
-		ProductCode:        form.ProductCode,
-		ProductName:        form.ProductName,
-		ProductDescription: form.ProductDescription,
-		ProductQty:         form.ProductQty,
-	}
-
-	products = append(products, *data)
 
 	return data, nil
 }
-func (c *productsCtx) Update(ctx context.Context, form *models.Product) (*models.Product, error) {
-	isExist := false
-	data := new(models.Product)
-	for i, val := range products {
-		if strings.EqualFold(val.ProductCode, form.ProductCode) {
-			isExist = true
-			data = &models.Product{
-				Model: gorm.Model{
-					ID:        val.ID,
-					CreatedAt: val.CreatedAt,
-					UpdatedAt: time.Now(),
-				},
-				ProductCode:        form.ProductCode,
-				ProductName:        form.ProductName,
-				ProductDescription: form.ProductDescription,
-				ProductQty:         form.ProductQty,
-			}
 
-			products[i] = *data
-			break
-		}
+func (c *productsCtx) Update(ctx context.Context, form *models.Product) (*models.Product, error) {
+	if form.ID < 1 {
+		return nil, errors.New("ID cannot be empty")
 	}
 
-	if !isExist {
+	data, err := c.productsRepository.Get(ctx, &models.Product{Model: gorm.Model{ID: form.ID}})
+	if err != nil {
+		return nil, err
+	}
+
+	if data == nil {
 		return nil, errors.New("product not found")
+	}
+
+	data.ProductCode = form.ProductCode
+	data.ProductName = form.ProductName
+	data.ProductDescription = form.ProductDescription
+	data.ProductQty = form.ProductQty
+	data.UpdatedAt = time.Now()
+
+	data, err = c.productsRepository.Upsert(ctx, data)
+	if err != nil {
+		return nil, err
 	}
 
 	return data, nil
 }
 
 func (c *productsCtx) View(ctx context.Context) ([]models.Product, error) {
-	return products, nil
-}
-
-func (c *productsCtx) Detail(ctx context.Context, productCode string) (*models.Product, error) {
-	isExist := false
-	data := new(models.Product)
-	for _, val := range products {
-		if strings.EqualFold(val.ProductCode, productCode) {
-			isExist = true
-			data = &val
-			break
-		}
-	}
-
-	if !isExist {
-		return nil, errors.New("product not found")
+	data, err := c.productsRepository.Select(ctx, &models.Product{})
+	if err != nil {
+		return nil, err
 	}
 
 	return data, nil
 }
 
-func (c *productsCtx) Delete(ctx context.Context, productCode string) error {
-	isExist := false
-	for i, val := range products {
-		if strings.EqualFold(val.ProductCode, productCode) {
-			isExist = true
-			products = append(products[:i], products[i+1:]...)
-			break
-		}
+func (c *productsCtx) Detail(ctx context.Context, productID int) (*models.Product, error) {
+	if productID < 1 {
+		return nil, errors.New("ID cannot be empty")
 	}
 
-	if !isExist {
-		return errors.New("product not found")
+	data, err := c.productsRepository.Get(ctx, &models.Product{Model: gorm.Model{ID: uint(productID)}})
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return data, nil
+}
+
+func (c *productsCtx) Delete(ctx context.Context, productID int) error {
+	if productID < 1 {
+		return errors.New("ID cannot be empty")
+	}
+
+	return c.productsRepository.Delete(ctx, &models.Product{Model: gorm.Model{ID: uint(productID)}})
 }

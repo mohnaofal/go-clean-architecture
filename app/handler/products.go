@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/mohnaofal/go-clean-architecture/app/models"
@@ -20,8 +21,8 @@ func (h *ProductsHandler) Mount(c *echo.Group) {
 	c.POST("", h.Create)
 	c.PUT("", h.Update)
 	c.GET("", h.View)
-	c.GET("/:code", h.Detail)
-	c.DELETE("/:code", h.Detele)
+	c.GET("/:id", h.Detail)
+	c.DELETE("/:id", h.Detele)
 }
 
 func (h *ProductsHandler) Create(c echo.Context) error {
@@ -84,8 +85,8 @@ func (h *ProductsHandler) View(c echo.Context) error {
 func (h *ProductsHandler) Detail(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	productCode := c.Param("code")
-	data, err := h.product.Detail(ctx, productCode)
+	productID, _ := strconv.Atoi(c.Param("id"))
+	data, err := h.product.Detail(ctx, productID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -99,8 +100,8 @@ func (h *ProductsHandler) Detail(c echo.Context) error {
 func (h *ProductsHandler) Detele(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	productCode := c.Param("code")
-	if err := h.product.Delete(ctx, productCode); err != nil {
+	productID, _ := strconv.Atoi(c.Param("id"))
+	if err := h.product.Delete(ctx, productID); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
